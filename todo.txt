@@ -1,0 +1,16 @@
+1. Recopilación de datos:
+Utiliza un conjunto de datos históricos de solicitudes de tarjetas de crédito. Este conjunto de datos debe contener características relevantes como ingresos, historial crediticio, edad, etc., así como la etiqueta de aprobación (aprobado/no aprobado).
+2. Preprocesamiento de datos:
+Limpia y preprocesa los datos. Esto puede incluir la eliminación de valores atípicos, la imputación de valores perdidos y la normalización de características numéricas.
+3. División de datos:
+Divide los datos en un conjunto de entrenamiento y un conjunto de prueba para evaluar el rendimiento del modelo.
+4. Entrenamiento del modelo:
+Utiliza regresión logística como algoritmo de aprendizaje supervisado. Durante el entrenamiento, utiliza técnicas de optimización de hiperparámetros, como búsqueda en cuadrícula o búsqueda aleatoria, para encontrar la combinación óptima de hiperparámetros que maximicen el rendimiento del modelo.
+5. Evaluación del modelo:
+Evalúa el modelo utilizando métricas como precisión, recall, F1-score, y curvas ROC-AUC para medir su rendimiento en la tarea de clasificación de aprobación de tarjetas de crédito.
+6. Despliegue de la aplicación:
+Desarrolla una interfaz de usuario amigable donde los usuarios puedan ingresar su información personal y recibir una respuesta sobre la aprobación de su solicitud de tarjeta de crédito en tiempo real.
+7. Pruebas y refinamiento:
+Realiza pruebas exhaustivas de la aplicación para garantizar su estabilidad y precisión. Realiza ajustes adicionales si es necesario para mejorar el rendimiento del modelo.
+8. Mantenimiento continuo:
+Una vez que la aplicación esté en funcionamiento, asegúrate de realizar un mantenimiento regular para mantenerla actualizada con los nuevos datos y cambios en los requisitos del negocio.
