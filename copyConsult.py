@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 
 # Establece la conexión a la base de datos
-engine = create_engine('mysql+mysqlconnector://root:root@localhost/walletApIa')
+engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
 
 # Conecta y obtén una conexión
 connection = engine.connect()

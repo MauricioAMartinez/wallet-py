@@ -1,50 +1,71 @@
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import numpy as np
+from sqlalchemy import create_engine, text
 
-# Datos de ejemplo con dos clases
-data = {
-    "MotivoSolicitud": ["Compras diarias", "Entretenimiento", "Compras diarias", "Entretenimiento"],
-    "NivelEducativo": ["Universitario", "Universitario", "Universitario", "Universitario"],
-    "EstadoCivil": ["Casado", "Soltero", "Casado", "Soltero"],
-    "DependientesFinancieros": [2, 1, 1, 3],
-    "Puntuacion": [750, 600, 650, 700],
-    "AntiguedadCuentas": [10, 5, 7, 8],
-    "IngresosMensuales": [5000, 4000, 3000, 6000],
-    "TipoTrabajo": ["Tiempo Completo", "Medio Tiempo", "Tiempo Completo", "Tiempo Completo"],
-    "AntiguedadEmpleo": [10, 3, 5, 8],
-    "GastosMensuales": [2000, 1500, 3000, 2500],
-    "EsApto": [1, 0, 0, 0]  # Dos clases: 1 para apto, 0 para no apto
-}
+def obtener_datos(personal_info_id):
+    engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
+    connection = engine.connect()
 
-# Convierte los datos en un DataFrame
-df = pd.DataFrame(data)
+    sql_query = text("""
+        SELECT ia.MotivoSolicitud, ia.NivelEducativo, ia.EstadoCivil, ia.DependientesFinancieros,
+               hc.Puntuacion, hc.LimiteCredito, hc.NumeroTarjetasPosecion, hc.AntiguedadCuentas,
+               fi.IngresosMensuales, tt.Nombre AS TipoTrabajo, fi.AntiguedadEmpleo, fi.GastosMensuales
+        FROM InformacionAdicional ia
+        JOIN HistorialCrediticio hc ON ia.PersonalInfoId = hc.PersonalInfoId
+        JOIN FinancieraInfo fi ON ia.PersonalInfoId = fi.PersonalInfoId
+        JOIN TipoTrabajos tt ON fi.TipoTrabajoId = tt.TipoTrabajoId
+        WHERE ia.PersonalInfoId = :personal_info_id
+    """)
 
-# Características (X) y etiqueta (y)
-X = df[["IngresosMensuales", "GastosMensuales"]]
-y = df["EsApto"]
+    result = connection.execute(sql_query.params(personal_info_id=personal_info_id))
+    df = pd.DataFrame(result.fetchall(), columns=result.keys())
+    connection.close()
 
-# Inicializa el modelo
-modelo = LogisticRegression()
+    return df
 
-# Ajusta el modelo a los datos
-modelo.fit(X, y)
+# Obtener los datos
+personal_info_id = 2
+df = obtener_datos(personal_info_id)
 
-# Realiza una predicción para determinar si es apto o no
-prediccion = modelo.predict(X)
+# Simular más datos para entrenamiento
+if len(df) < 10:
+    print("Advertencia: datos insuficientes, simulando datos adicionales para el entrenamiento.")
+    df = pd.concat([df]*10, ignore_index=True)
 
-# Imprime la predicción
-print("Predicción:", prediccion)
-# Mapeo de etiquetas predichas a texto
-prediccion_texto = ["No Apto" if p == 0 else "Apto" for p in prediccion]
-# Mapeo de etiquetas predichas a texto
-prediccion_texto = ["No Apto" if p == 0 else "Apto" for p in prediccion]
+# Convertir las características categóricas a numéricas usando LabelEncoder
+le = LabelEncoder()
+df['MotivoSolicitud'] = le.fit_transform(df['MotivoSolicitud'])
+df['NivelEducativo'] = le.fit_transform(df['NivelEducativo'])
+df['EstadoCivil'] = le.fit_transform(df['EstadoCivil'])
+df['TipoTrabajo'] = le.fit_transform(df['TipoTrabajo'])
 
-# Imprimir resultados
-aptos = sum(1 for p in prediccion if p == 1)
+# Añadir una columna objetivo aleatoria (en un caso real, esta sería proporcionada)
+df["TarjetaCredito"] = np.random.choice([0, 1], size=len(df))
 
-print("Cantidad de instancias aptas:", aptos)
+# Separar características y objetivo
+X = df.drop('TarjetaCredito', axis=1)
+y = df['TarjetaCredito']
 
-if aptos >= 3:
-    print("Es viable que acceda a una tarjeta.")
-else:
-    print("No es viable que acceda a una tarjeta.")
+# Dividir en conjunto de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Crear el modelo
+model = RandomForestClassifier(random_state=42)
+
+# Entrenar el modelo
+model.fit(X_train, y_train)
+
+# Hacer predicciones
+y_pred = model.predict(X_test)
+
+# Evaluar el modelo
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+
+# Hacer una predicción con los datos originales
+prediction = model.predict(X.head(1))
+print(f"Predicción para el primer registro: {'Tarjeta aprobada' if prediction[0] == 1 else 'Tarjeta no aprobada'}")
