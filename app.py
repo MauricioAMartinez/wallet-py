@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
+CORS(app, resources={r"/predict": {"origins": "http://localhost:4200"}})
 
 def obtener_datos(personal_info_id):
     engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
@@ -76,11 +77,14 @@ def predict():
 
     # Hacer una predicción con los datos originales
     prediction = model.predict(X.head(1))
-    resultado = 'Tarjeta aprobada' if prediction[0] == 1 else 'Tarjeta no aprobada'
+    predictBolean = False
+    resultado = 'Tarjeta esta aprobada' if prediction[0] == 1 else 'Tarjeta no fue aprobada'
+    predictBolean = True if prediction[0] == 1 else False
 
     return jsonify({
         "personal_info_id": personal_info_id,
-        "prediction": resultado
+        "prediction": resultado,
+        "predicBolean": predictBolean
     })
 
 if __name__ == '__main__':
