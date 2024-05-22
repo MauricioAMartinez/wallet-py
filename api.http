@@ -1,4 +1,4 @@
 ## get resultado
-GET http://127.0.0.1:5000/predict?id=2
+GET http://127.0.0.1:5001/predict?id=2
 ###Docker Get
 GET http://172.18.0.6:5000/predict?id=2

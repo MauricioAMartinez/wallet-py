@@ -8,21 +8,20 @@ from sklearn.ensemble import RandomForestClassifier
 from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/predict": {"origins": "http://localhost:4200"}})
 
 def obtener_datos(personal_info_id):
-    # engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
-    engine = create_engine('mysql+mysqlconnector://root:@mysql-container/walletApIa')
+    engine = create_engine('mysql+mysqlconnector://root:12345@mysql-container/walletApIa')
     connection = engine.connect()
 
     sql_query = text("""
         SELECT ia.MotivoSolicitud, ia.NivelEducativo, ia.EstadoCivil, ia.DependientesFinancieros,
                hc.Puntuacion, hc.LimiteCredito, hc.NumeroTarjetasPosecion, hc.AntiguedadCuentas,
-               fi.IngresosMensuales, tt.Nombre AS TipoTrabajo, fi.AntiguedadEmpleo, fi.GastosMensuales
+               fi.IngresosMensuales, tt.Nombre AS Tipotrabajos, fi.AntiguedadEmpleo, fi.GastosMensuales
         FROM InformacionAdicional ia
         JOIN HistorialCrediticio hc ON ia.PersonalInfoId = hc.PersonalInfoId
         JOIN FinancieraInfo fi ON ia.PersonalInfoId = fi.PersonalInfoId
-        JOIN TipoTrabajos tt ON fi.TipoTrabajoId = tt.TipoTrabajoId
+        JOIN Tipotrabajos tt ON fi.TipoTrabajoId = tt.TipoTrabajoId
         WHERE ia.PersonalInfoId = :personal_info_id
     """)
 
@@ -58,7 +57,7 @@ def predict():
     df['MotivoSolicitud'] = le.fit_transform(df['MotivoSolicitud'])
     df['NivelEducativo'] = le.fit_transform(df['NivelEducativo'])
     df['EstadoCivil'] = le.fit_transform(df['EstadoCivil'])
-    df['TipoTrabajo'] = le.fit_transform(df['TipoTrabajo'])
+    df['Tipotrabajos'] = le.fit_transform(df['Tipotrabajos'])
 
     # Añadir una columna objetivo aleatoria (en un caso real, esta sería proporcionada)
     df["TarjetaCredito"] = np.random.choice([0, 1], size=len(df))
@@ -89,4 +88,5 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+

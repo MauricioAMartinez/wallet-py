@@ -2,16 +2,14 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-
-# Instalar las dependencias necesarias
-RUN pip install --no-cache-dir -r requirements.txt
-
+# Copiar los archivos de la aplicación
 COPY . .
 
+# Instalar las dependencias
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Exponer el puerto en el que correrá la aplicación
 EXPOSE 5001
 
-ENV FLASK_ENV=development
-
-# Comando para ejecutar la aplicación
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
+# Comando para correr la aplicación
+CMD ["python", "app.py"]
