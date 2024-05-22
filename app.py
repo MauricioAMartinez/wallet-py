@@ -8,10 +8,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
-CORS(app, resources={r"/predict": {"origins": "http://localhost:4200"}})
+CORS(app)
 
 def obtener_datos(personal_info_id):
-    engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
+    # engine = create_engine('mysql+mysqlconnector://root:@localhost/walletApIa')
+    engine = create_engine('mysql+mysqlconnector://root:@mysql-container/walletApIa')
     connection = engine.connect()
 
     sql_query = text("""
@@ -88,4 +89,4 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)
